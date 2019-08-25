@@ -1,8 +1,9 @@
 package bahaa.apps.ytd.view;
 
 import android.content.Context;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import javax.inject.Inject;
 
@@ -21,6 +22,8 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     Context context;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +34,7 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
                 .downloadModule(new DownloadModule(this))
                 .build()
                 .inject(this);
+
     }
 
     @Override
