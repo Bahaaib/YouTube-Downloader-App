@@ -1,24 +1,33 @@
 package bahaa.apps.ytd.contracts;
 
+import java.util.HashMap;
+
+import at.huber.youtubeExtractor.YtFile;
+import bahaa.apps.ytd.ExtractionListener;
+
 public interface Download {
 
     interface View {
 
-        void initViews();
-
         void showProgressBar();
+
+        void showErrorDialog();
+
+        void showNoVideoToast();
 
         void addQualityButtons();
     }
 
     interface Presenter {
 
-        void onButtonClick();
+        void validateInputLink(String link);
+
+        void validateYouTubeLinkFormat(String link);
     }
 
     interface Model {
-        interface onCompleteListener {
-            void onLinkExtracted(String ytDownloadLink);
-        }
+
+        void beginLinkExtraction(String link, final ExtractionListener listener);
+
     }
 }

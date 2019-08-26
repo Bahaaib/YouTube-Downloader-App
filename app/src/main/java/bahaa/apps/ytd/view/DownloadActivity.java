@@ -3,15 +3,24 @@ package bahaa.apps.ytd.view;
 import android.content.Context;
 import android.os.Bundle;
 
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import bahaa.apps.ytd.ApplicationInstance;
 import bahaa.apps.ytd.R;
 import bahaa.apps.ytd.contracts.Download;
 import bahaa.apps.ytd.root.components.DaggerActivityComponent;
 import bahaa.apps.ytd.root.modules.DownloadModule;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
 
 public class DownloadActivity extends AppCompatActivity implements Download.View {
 
@@ -21,7 +30,13 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     @Inject
     Context context;
 
+    @BindView(R.id.link_text)
+    TextInputEditText linkEditText;
 
+    @BindView(R.id.download_btn)
+    AppCompatButton downloadButton;
+
+    private Unbinder unbinder;
 
 
     @Override
@@ -35,11 +50,12 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
                 .build()
                 .inject(this);
 
+        initViews();
+
     }
 
-    @Override
-    public void initViews() {
-
+    void initViews() {
+        unbinder = ButterKnife.bind(this);
     }
 
     @Override
@@ -51,4 +67,27 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     public void addQualityButtons() {
 
     }
+
+    @Override
+    public void showErrorDialog() {
+
+    }
+
+    @Override
+    public void showNoVideoToast() {
+
+    }
+
+    @OnClick(R.id.download_btn)
+    void pressButton() {
+        String link = linkEditText.getText().toString();
+        presenter.validateInputLink(link);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbinder.unbind();
+    }
+
 }

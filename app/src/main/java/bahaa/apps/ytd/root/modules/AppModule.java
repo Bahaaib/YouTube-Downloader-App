@@ -1,7 +1,9 @@
 package bahaa.apps.ytd.root.modules;
 
 import android.app.Application;
+import android.content.Context;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import bahaa.apps.ytd.ApplicationInstance;
@@ -16,10 +18,11 @@ public class AppModule {
         this.applicationInstance = applicationInstance;
     }
 
-    @Provides
     @Singleton
-    public Application provideApplication(){
+    @Provides
+    public Application provideApplication() {
         return applicationInstance;
     }
+
 
 }

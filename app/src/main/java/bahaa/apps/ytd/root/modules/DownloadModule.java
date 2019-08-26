@@ -1,5 +1,10 @@
 package bahaa.apps.ytd.root.modules;
 
+import android.content.Context;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import bahaa.apps.ytd.contracts.Download;
 import bahaa.apps.ytd.model.DownloadModel;
 import bahaa.apps.ytd.presenter.DownloadPresenter;
@@ -21,8 +26,8 @@ public class DownloadModule {
     }
 
     @Provides
-    public DownloadModel provideModel() {
-        return new DownloadModel();
+    public DownloadModel provideModel(Context context) {
+        return new DownloadModel(context);
     }
 
     @Provides
