@@ -1,6 +1,9 @@
 package bahaa.apps.ytd.view;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -10,10 +13,14 @@ import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -53,6 +60,7 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     @BindDrawable(R.drawable.button_background)
     Drawable buttonBackground;
 
+    private VideoFile tempFile;
     private Unbinder unbinder;
 
 
@@ -81,6 +89,23 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
                 context.getResources().getDisplayMetrics());
     }
 
+    private boolean isStoragePermissionGranted() {
+
+        int result = ContextCompat.checkSelfPermission(DownloadActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        return result == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestStoragePermission() {
+        ActivityCompat.requestPermissions(DownloadActivity.this
+                , new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+    }
+
+    private void displayToast(String msg) {
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+
+    }
+
     @Override
     public void showProgressBar() {
 
@@ -105,8 +130,20 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
             button.setLayoutParams(params);
 
             button.setOnClickListener(v -> {
-                presenter.beginDownload(file.getFile().getUrl(), file.getMetaTitle(), file.getFileName());
+                if (!isStoragePermissionGranted()) {
+                    requestStoragePermission();
+                    tempFile = file;
+                } else {
+                    presenter.beginDownload(
+                            file.getFile().getUrl(),
+                            file.getMetaTitle(),
+                            file.getFileName());
+                    displayToast("Download started");
+                }
+
+
             });
+
 
             linearLayout.addView(button);
         }
@@ -119,13 +156,28 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
 
     @Override
     public void showNoVideoToast() {
-
+        displayToast("Video NOT Found");
     }
 
     @OnClick(R.id.download_btn)
     void pressButton() {
         String link = linkEditText.getText().toString();
         presenter.validateInputLink(link);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+            displayToast("Permission Denied!");
+        } else {
+            presenter.beginDownload(
+                    tempFile.getFile().getUrl(),
+                    tempFile.getMetaTitle(),
+                    tempFile.getFileName()
+            );
+        }
     }
 
     @Override

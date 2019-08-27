@@ -110,6 +110,6 @@ public class DownloadPresenter implements Download.Presenter, ExtractionListener
 
     @Override
     public void onExtractionFailed() {
-        Log.i("statuss", "Videos NOT Found");
+        downloadView.showNoVideoToast();
     }
 }
