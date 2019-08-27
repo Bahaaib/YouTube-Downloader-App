@@ -1,10 +1,13 @@
 package bahaa.apps.ytd.view;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.MotionEvent;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
@@ -94,6 +97,7 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
             Button button = new Button(this);
             button.setBackground(buttonBackground);
             button.setText(file.getButtonText());
+            button.setTextColor(getResources().getColor(R.color.colorPrimaryLight));
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -122,6 +126,16 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     void pressButton() {
         String link = linkEditText.getText().toString();
         presenter.validateInputLink(link);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (getCurrentFocus() != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            assert imm != null;
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
