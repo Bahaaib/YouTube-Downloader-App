@@ -2,10 +2,12 @@ package bahaa.apps.ytd.presenter;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import at.huber.youtubeExtractor.YtFile;
 import bahaa.apps.ytd.ExtractionListener;
+import bahaa.apps.ytd.VideoFile;
 import bahaa.apps.ytd.contracts.Download;
 import bahaa.apps.ytd.model.DownloadModel;
 
@@ -38,8 +40,67 @@ public class DownloadPresenter implements Download.Presenter, ExtractionListener
     }
 
     @Override
-    public void onExtractionComplete(HashMap<String, YtFile> videosList) {
-        Log.i("statuss", "I got " + videosList.size() + " Files");
+    public void buildButtonsText(ArrayList<VideoFile> videoFiles) {
+        String buttonText;
+        ArrayList<VideoFile> fileList = new ArrayList<>();
+
+        for (VideoFile file : videoFiles) {
+            if (file.getFile().getFormat().getHeight() == -1) {
+                buttonText = "Audio ";
+                buttonText = buttonText.concat(String.valueOf(file.getFile().getFormat().getAudioBitrate()));
+                buttonText = buttonText.concat("kbit/s");
+            } else {
+                buttonText = String.valueOf(file.getFile().getFormat().getHeight());
+                buttonText = buttonText.concat("p");
+            }
+
+            if (file.getFile().getFormat().isDashContainer()) {
+                buttonText = buttonText.concat(" [Dash]");
+            }
+            VideoFile vFile = new VideoFile();
+            vFile.setButtonText(buttonText);
+            vFile.setMetaTitle(file.getMetaTitle());
+            vFile.setFile(file.getFile());
+
+            fileList.add(vFile);
+        }
+
+        buildFileNames(fileList);
+    }
+
+    @Override
+    public void buildFileNames(ArrayList<VideoFile> videoFiles) {
+
+        String fileName;
+        ArrayList<VideoFile> fileList = new ArrayList<>();
+
+        for (VideoFile file : videoFiles) {
+            if (file.getMetaTitle().length() > 55) {
+                fileName = file.getMetaTitle().substring(0, 55) + ".";
+                fileName = fileName.concat(file.getFile().getFormat().getExt());
+            } else {
+                fileName = file.getMetaTitle() + "." + file.getFile().getFormat().getExt();
+            }
+
+            fileName = fileName.replaceAll("[\\\\><\"|*?%:#/]", "");
+
+            VideoFile videoFile = new VideoFile();
+            videoFile.setFile(file.getFile());
+            videoFile.setMetaTitle(file.getMetaTitle());
+            videoFile.setButtonText(file.getButtonText());
+            videoFile.setFileName(fileName);
+
+            fileList.add(videoFile);
+        }
+
+        downloadView.addQualityButtons(fileList);
+
+    }
+
+
+    @Override
+    public void onExtractionComplete(ArrayList<VideoFile> videoFiles) {
+        buildButtonsText(videoFiles);
     }
 
     @Override

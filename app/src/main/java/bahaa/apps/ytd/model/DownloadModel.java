@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.SparseArray;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.inject.Inject;
@@ -14,14 +15,14 @@ import at.huber.youtubeExtractor.VideoMeta;
 import at.huber.youtubeExtractor.YouTubeExtractor;
 import at.huber.youtubeExtractor.YtFile;
 import bahaa.apps.ytd.ExtractionListener;
+import bahaa.apps.ytd.VideoFile;
 import bahaa.apps.ytd.contracts.Download;
 import bahaa.apps.ytd.root.scopes.DownloadActivityScope;
 
 public class DownloadModel implements Download.Model {
 
     private WeakReference<Context> weakReference;
-    private HashMap<String, YtFile> ytFileHashMap = new HashMap<>();
-
+    private ArrayList<VideoFile> videoFiles = new ArrayList<>();
 
     @Inject
     public DownloadModel(@Named("Application Context") Context context) {
@@ -35,6 +36,7 @@ public class DownloadModel implements Download.Model {
         new YouTubeExtractor(weakReference.get()) {
             @Override
             protected void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta videoMeta) {
+                videoFiles.clear();
                 if (ytFiles == null) {
                     listener.onExtractionFailed();
                 } else {
@@ -43,10 +45,13 @@ public class DownloadModel implements Download.Model {
                         YtFile ytFile = ytFiles.get(itag);
 
                         if (ytFile.getFormat().getHeight() == -1 || ytFile.getFormat().getHeight() >= 360) {
-                            ytFileHashMap.put(videoMeta.getTitle(), ytFile);
+                            VideoFile file = new VideoFile();
+                            file.setFile(ytFile);
+                            file.setMetaTitle(videoMeta.getTitle());
+                            videoFiles.add(file);
                         }
                     }
-                    listener.onExtractionComplete(ytFileHashMap);
+                    listener.onExtractionComplete(videoFiles);
                 }
 
             }

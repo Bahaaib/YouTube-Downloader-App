@@ -1,7 +1,12 @@
 package bahaa.apps.ytd.view;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.TypedValue;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,14 +14,17 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import bahaa.apps.ytd.ApplicationInstance;
 import bahaa.apps.ytd.R;
+import bahaa.apps.ytd.VideoFile;
 import bahaa.apps.ytd.contracts.Download;
 import bahaa.apps.ytd.root.components.DaggerActivityComponent;
 import bahaa.apps.ytd.root.modules.DownloadModule;
+import butterknife.BindDrawable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -35,6 +43,12 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
 
     @BindView(R.id.download_btn)
     AppCompatButton downloadButton;
+
+    @BindView(R.id.main_layout)
+    LinearLayout linearLayout;
+
+    @BindDrawable(R.drawable.button_background)
+    Drawable buttonBackground;
 
     private Unbinder unbinder;
 
@@ -58,14 +72,40 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
         unbinder = ButterKnife.bind(this);
     }
 
+    int getDP(float pixels) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                pixels,
+                context.getResources().getDisplayMetrics());
+    }
+
     @Override
     public void showProgressBar() {
 
     }
 
     @Override
-    public void addQualityButtons() {
+    public void addQualityButtons(ArrayList<VideoFile> fileList) {
 
+        if (linearLayout.getChildCount() > 0) {
+            linearLayout.removeAllViews();
+        }
+
+        for (VideoFile file : fileList) {
+            Button button = new Button(this);
+            button.setBackground(buttonBackground);
+            button.setText(file.getButtonText());
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(getDP(10), getDP(10), getDP(10), getDP(10));
+            button.setLayoutParams(params);
+
+            button.setOnClickListener(v -> {
+                Log.i("statuss", "I'm Going to download");
+            });
+
+            linearLayout.addView(button);
+        }
     }
 
     @Override
