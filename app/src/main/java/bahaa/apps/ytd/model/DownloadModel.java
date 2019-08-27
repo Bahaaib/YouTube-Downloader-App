@@ -1,7 +1,10 @@
 package bahaa.apps.ytd.model;
 
 import android.annotation.SuppressLint;
+import android.app.DownloadManager;
 import android.content.Context;
+import android.net.Uri;
+import android.os.Environment;
 import android.util.SparseArray;
 
 import java.lang.ref.WeakReference;
@@ -17,7 +20,6 @@ import at.huber.youtubeExtractor.YtFile;
 import bahaa.apps.ytd.ExtractionListener;
 import bahaa.apps.ytd.VideoFile;
 import bahaa.apps.ytd.contracts.Download;
-import bahaa.apps.ytd.root.scopes.DownloadActivityScope;
 
 public class DownloadModel implements Download.Model {
 
@@ -56,5 +58,19 @@ public class DownloadModel implements Download.Model {
 
             }
         }.extract(link, true, false);
+    }
+
+    @Override
+    public void downloadFromUrl(String url, String metadata, String filename) {
+        Uri uri = Uri.parse(url);
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+
+        request.setTitle(metadata);
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+
+        DownloadManager manager = (DownloadManager) weakReference.get().getSystemService(Context.DOWNLOAD_SERVICE);
+        manager.enqueue(request);
     }
 }

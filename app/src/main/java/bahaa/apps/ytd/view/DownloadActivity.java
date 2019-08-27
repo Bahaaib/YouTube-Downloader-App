@@ -105,7 +105,7 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
             button.setLayoutParams(params);
 
             button.setOnClickListener(v -> {
-                Log.i("statuss", "I'm Going to download");
+                presenter.beginDownload(file.getFile().getUrl(), file.getMetaTitle(), file.getFileName());
             });
 
             linearLayout.addView(button);

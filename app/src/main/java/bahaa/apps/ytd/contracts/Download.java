@@ -29,11 +29,15 @@ public interface Download {
         void buildButtonsText(ArrayList<VideoFile> videoFiles);
 
         void buildFileNames(ArrayList<VideoFile> videoFiles);
+
+        void beginDownload(String url, String metadata, String filename);
     }
 
     interface Model {
 
         void beginLinkExtraction(String link, final ExtractionListener listener);
+
+        void downloadFromUrl(String url, String metadata, String filename);
 
     }
 }

@@ -55,7 +55,7 @@ public class DownloadPresenter implements Download.Presenter, ExtractionListener
             }
 
             if (file.getFile().getFormat().isDashContainer()) {
-                buttonText = buttonText.concat(" [Dash]");
+                buttonText = buttonText.concat(" [DASH]");
             }
             VideoFile vFile = new VideoFile();
             vFile.setButtonText(buttonText);
@@ -95,6 +95,11 @@ public class DownloadPresenter implements Download.Presenter, ExtractionListener
 
         downloadView.addQualityButtons(fileList);
 
+    }
+
+    @Override
+    public void beginDownload(String url, String metadata, String filename) {
+        downloadModel.downloadFromUrl(url, metadata, filename);
     }
 
 
