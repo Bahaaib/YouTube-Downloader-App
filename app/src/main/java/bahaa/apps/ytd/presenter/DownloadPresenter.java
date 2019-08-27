@@ -24,7 +24,7 @@ public class DownloadPresenter implements Download.Presenter, ExtractionListener
     @Override
     public void validateInputLink(String link) {
         if (link.isEmpty()) {
-            downloadView.showErrorDialog();
+            downloadView.showErrorMessage();
         } else {
             validateYouTubeLinkFormat(link);
         }
@@ -34,8 +34,9 @@ public class DownloadPresenter implements Download.Presenter, ExtractionListener
     public void validateYouTubeLinkFormat(String link) {
         if (link.contains("://youtu.be/") || link.contains("youtube.com/watch?v=")) {
             downloadModel.beginLinkExtraction(link, this);
+            downloadView.showProgressDialog();
         } else {
-            downloadView.showErrorDialog();
+            downloadView.showErrorMessage();
         }
     }
 
@@ -94,6 +95,7 @@ public class DownloadPresenter implements Download.Presenter, ExtractionListener
         }
 
         downloadView.addQualityButtons(fileList);
+        downloadView.dismissProgressDialog();
 
     }
 

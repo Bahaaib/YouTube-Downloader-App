@@ -11,9 +11,11 @@ public interface Download {
 
     interface View {
 
-        void showProgressBar();
+        void showProgressDialog();
 
-        void showErrorDialog();
+        void dismissProgressDialog();
+
+        void showErrorMessage();
 
         void showNoVideoToast();
 

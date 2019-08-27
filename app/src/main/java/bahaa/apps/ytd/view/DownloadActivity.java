@@ -2,6 +2,7 @@ package bahaa.apps.ytd.view;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -13,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 
@@ -23,6 +25,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 
@@ -48,6 +51,9 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     @Inject
     Context context;
 
+    @BindView(R.id.link_input_layout)
+    TextInputLayout linkInputLayout;
+
     @BindView(R.id.link_text)
     TextInputEditText linkEditText;
 
@@ -61,6 +67,7 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     Drawable buttonBackground;
 
     private VideoFile tempFile;
+    private ProgressDialog progressDialog;
     private Unbinder unbinder;
 
 
@@ -107,8 +114,15 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     }
 
     @Override
-    public void showProgressBar() {
+    public void showProgressDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Fetching Available Quality..");
+        progressDialog.show();
+    }
 
+    @Override
+    public void dismissProgressDialog() {
+        progressDialog.dismiss();
     }
 
     @Override
@@ -150,8 +164,8 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     }
 
     @Override
-    public void showErrorDialog() {
-
+    public void showErrorMessage() {
+        linkInputLayout.setError("Invalid YouTube link");
     }
 
     @Override
