@@ -19,6 +19,8 @@ public interface Download {
 
         void showNoVideoToast();
 
+        void showUnexpectedError();
+
         void addQualityButtons(ArrayList<VideoFile> titles);
     }
 

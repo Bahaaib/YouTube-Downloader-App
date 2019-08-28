@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -95,6 +97,7 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
                 .inject(this);
 
         initViews();
+        checkYouTubeLinkMessage(savedInstanceState);
 
     }
 
@@ -110,6 +113,22 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
 
     void initViews() {
         unbinder = ButterKnife.bind(this);
+    }
+
+    void checkYouTubeLinkMessage(Bundle savedInstanceState) {
+        if (savedInstanceState == null
+                && Intent.ACTION_SEND.equals(getIntent().getAction())
+                && getIntent().getType() != null
+                && getIntent().getType().equals("text/plain")) {
+            String ytLink = getIntent().getStringExtra(Intent.EXTRA_TEXT);
+
+            linkEditText.setText(ytLink);
+            linkInputLayout.requestFocus();
+
+            presenter.validateInputLink(ytLink);
+
+
+        }
     }
 
     int getDP(float pixels) {
@@ -163,7 +182,7 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
 
     @Override
     public void showProgressDialog() {
-        progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this, R.style.MaterialAlertDialogStyle);
         progressDialog.setMessage("Fetching Available Quality..");
         progressDialog.show();
     }
@@ -224,7 +243,14 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     }
 
     @Override
+    public void showUnexpectedError() {
+        linearLayout.removeAllViews();
+        displayToast("Unexpected Error");
+    }
+
+    @Override
     public void showNoVideoToast() {
+        linearLayout.removeAllViews();
         displayToast("Video NOT Found");
     }
 
@@ -287,6 +313,7 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
         }
         return super.dispatchTouchEvent(ev);
     }
+
 
     @Override
     protected void onDestroy() {

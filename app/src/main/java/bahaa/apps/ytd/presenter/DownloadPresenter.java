@@ -76,6 +76,11 @@ public class DownloadPresenter implements Download.Presenter, ExtractionListener
         ArrayList<VideoFile> fileList = new ArrayList<>();
 
         for (VideoFile file : videoFiles) {
+            //In case of link manipulated manually and corrupted..
+            if (file.getMetaTitle() == null) {
+                downloadView.showUnexpectedError();
+                break;
+            }
             if (file.getMetaTitle().length() > 55) {
                 fileName = file.getMetaTitle().substring(0, 55) + ".";
                 fileName = fileName.concat(file.getFile().getFormat().getExt());
