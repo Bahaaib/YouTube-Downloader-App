@@ -68,6 +68,16 @@
         android:text="DOWNLOAD"
         android:textColor="@android:color/white" />
 
+    <TextView
+        android:visibility="invisible"
+        android:id="@+id/network_state"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:text="Connecting..."
+        android:background="@color/colorAccent"/>
+
 
     <ScrollView
         android:layout_width="match_parent"

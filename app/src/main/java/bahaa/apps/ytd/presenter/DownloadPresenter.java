@@ -113,5 +113,6 @@ public class DownloadPresenter implements Download.Presenter, ExtractionListener
     @Override
     public void onExtractionFailed() {
         downloadView.showNoVideoToast();
+        downloadView.dismissProgressDialog();
     }
 }

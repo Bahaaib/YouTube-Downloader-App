@@ -4,17 +4,24 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -35,6 +42,7 @@ import bahaa.apps.ytd.ApplicationInstance;
 import bahaa.apps.ytd.R;
 import bahaa.apps.ytd.VideoFile;
 import bahaa.apps.ytd.contracts.Download;
+import bahaa.apps.ytd.receiver.ConnectivityReceiver;
 import bahaa.apps.ytd.root.components.DaggerActivityComponent;
 import bahaa.apps.ytd.root.modules.DownloadModule;
 import butterknife.BindDrawable;
@@ -43,7 +51,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-public class DownloadActivity extends AppCompatActivity implements Download.View {
+public class DownloadActivity extends AppCompatActivity implements Download.View
+        , ConnectivityReceiver.ConnectivityReceiverListener {
 
     @Inject
     Download.Presenter presenter;
@@ -66,6 +75,9 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     @BindDrawable(R.drawable.button_background)
     Drawable buttonBackground;
 
+    @BindView(R.id.network_state)
+    TextView networkStateText;
+
     private VideoFile tempFile;
     private ProgressDialog progressDialog;
     private Unbinder unbinder;
@@ -86,6 +98,16 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
 
     }
 
+    @OnClick(R.id.download_btn)
+    void pressButton() {
+        String link = linkEditText.getText().toString();
+        if (isNetworkAvailable()) {
+            presenter.validateInputLink(link);
+        } else {
+            displayToast("No Network");
+        }
+    }
+
     void initViews() {
         unbinder = ButterKnife.bind(this);
     }
@@ -97,10 +119,16 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     }
 
     private boolean isStoragePermissionGranted() {
-
         int result = ContextCompat.checkSelfPermission(DownloadActivity.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
         return result == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     private void requestStoragePermission() {
@@ -111,6 +139,26 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
     private void displayToast(String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
 
+    }
+
+    private void watchText(TextInputEditText editText, TextInputLayout textInputLayout) {
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                textInputLayout.setErrorEnabled(false);
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     @Override
@@ -148,11 +196,16 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
                     requestStoragePermission();
                     tempFile = file;
                 } else {
-                    presenter.beginDownload(
-                            file.getFile().getUrl(),
-                            file.getMetaTitle(),
-                            file.getFileName());
-                    displayToast("Download started");
+                    if (isNetworkAvailable()) {
+                        presenter.beginDownload(
+                                file.getFile().getUrl(),
+                                file.getMetaTitle(),
+                                file.getFileName());
+                        displayToast("Download started");
+                    } else {
+                        displayToast("Network Disconnected");
+                    }
+
                 }
 
 
@@ -165,7 +218,9 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
 
     @Override
     public void showErrorMessage() {
+        linkInputLayout.setErrorEnabled(true);
         linkInputLayout.setError("Invalid YouTube link");
+        watchText(linkEditText, linkInputLayout);
     }
 
     @Override
@@ -173,10 +228,34 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
         displayToast("Video NOT Found");
     }
 
-    @OnClick(R.id.download_btn)
-    void pressButton() {
-        String link = linkEditText.getText().toString();
-        presenter.validateInputLink(link);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+
+        ConnectivityReceiver connectivityReceiver = new ConnectivityReceiver();
+        registerReceiver(connectivityReceiver, intentFilter);
+
+        ApplicationInstance.get(context).setConnectivityListener(this);
+    }
+
+    @Override
+    public void onNetworkConnectionChanged(boolean isConnected) {
+        if (isConnected) {
+            networkStateText.setText("Connected");
+            networkStateText.setTextColor(Color.WHITE);
+            networkStateText.setBackgroundColor(Color.GREEN);
+            networkStateText.postDelayed(() ->
+                    networkStateText.setVisibility(View.INVISIBLE), 1000);
+        } else {
+            networkStateText.setVisibility(View.VISIBLE);
+            networkStateText.setText("Connecting...");
+            networkStateText.setTextColor(Color.WHITE);
+            networkStateText.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+        }
+
+
     }
 
     @Override
@@ -186,11 +265,16 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
         if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
             displayToast("Permission Denied!");
         } else {
-            presenter.beginDownload(
-                    tempFile.getFile().getUrl(),
-                    tempFile.getMetaTitle(),
-                    tempFile.getFileName()
-            );
+            if (isNetworkAvailable()) {
+                presenter.beginDownload(
+                        tempFile.getFile().getUrl(),
+                        tempFile.getMetaTitle(),
+                        tempFile.getFileName());
+                displayToast("Download started");
+            } else {
+                displayToast("Network Disconnected");
+            }
+
         }
     }
 
