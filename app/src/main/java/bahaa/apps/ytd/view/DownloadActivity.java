@@ -250,8 +250,8 @@ public class DownloadActivity extends AppCompatActivity implements Download.View
                     networkStateText.setVisibility(View.INVISIBLE), 1000);
         } else {
             networkStateText.setVisibility(View.VISIBLE);
-            networkStateText.setText("Connecting...");
-            networkStateText.setTextColor(Color.WHITE);
+            networkStateText.setText("Waiting for network...");
+            networkStateText.setTextColor(Color.parseColor("#707070"));
             networkStateText.setBackgroundColor(getResources().getColor(R.color.colorAccent));
         }
 

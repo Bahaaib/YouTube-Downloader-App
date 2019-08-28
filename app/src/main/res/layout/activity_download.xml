@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="70dp"
-        android:text="YOUTUBE DOWNLOADER"
+        android:text="YouTube DOWNLOADER"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -75,7 +75,6 @@
         android:layout_height="20dp"
         android:layout_alignParentBottom="true"
         android:gravity="center"
-        android:text="Connecting..."
         android:background="@color/colorAccent"/>
 
 
